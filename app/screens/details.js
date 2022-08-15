@@ -155,7 +155,7 @@ function DetailsScreen({ route, navigation }) {
             visible={downloadVisible}
             transparent={true}
           >
-            <View style={[styles.modalContainer, { height: "60%" }]}>
+            <View style={[styles.modalContainer, { height: "70%" }]}>
               <TouchableOpacity onPress={() => setDownloadVisible(false)}>
                 <View style={styles.iconContainer}>
                   <View style={styles.iconBG}>
