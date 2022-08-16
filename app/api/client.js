@@ -1,8 +1,20 @@
 import { create } from "apisauce";
-import * as base from "./enviroment.json";
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, onValue } from "firebase/database";
+import { firebaseConfig } from "./config.json";
+
+let BASEURL = "";
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const url = ref(db, "url/");
+onValue(url, (snapshot) => {
+  const data = snapshot.val();
+  BASEURL = data;
+});
 
 const API = create({
-  baseURL: base["url"],
+  baseURL: BASEURL,
 });
 
 export default {
