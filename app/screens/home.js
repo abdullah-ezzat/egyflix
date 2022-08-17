@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import Constants from "expo-constants";
 
 import StyledSlideList from "../components/watchList";
@@ -11,6 +11,7 @@ import colors from "../config/colors";
 import get from "../api/get";
 import useApi from "../hooks/useApi";
 import Loading from "../components/loading";
+import Icon from "../components/icon";
 
 function HomeScreen({ navigation }) {
   const [status, setStatus] = useState("Movies");
@@ -85,6 +86,11 @@ function HomeScreen({ navigation }) {
           image={require("../assets/images/pic1.png")}
           padding={5}
         />
+        <View style={styles.searchContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate("Search")}>
+            <Icon name="magnify" size={30} color={colors.light} />
+          </TouchableOpacity>
+        </View>
         <Separator top={30} />
         <View style={styles.rowContainer}>
           <Badge name="Movies" onPress={() => changeStatus("Movies")} />
@@ -169,6 +175,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     left: -10,
+  },
+  searchContainer: {
+    position: "absolute",
+    top: Constants.statusBarHeight - 10,
+    right: 40,
   },
   textAlign: {
     alignItems: "flex-start",

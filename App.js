@@ -10,6 +10,7 @@ import HomeScreen from "./app/screens/home";
 import DetailsScreen from "./app/screens/details";
 import VideoPlayScreen from "./app/screens/video";
 import colors from "./app/config/colors";
+import SearchScreen from "./app/screens/search";
 
 const Stack = createStackNavigator();
 const StackNavigator = () => (
@@ -22,7 +23,6 @@ const StackNavigator = () => (
       headerTitle: "Back",
     }}
   >
-    <Stack.Screen name="Welcome" component={WelcomeScreen} />
     <Stack.Screen
       name="Details"
       component={DetailsScreen}
@@ -33,6 +33,12 @@ const StackNavigator = () => (
       component={VideoPlayScreen}
       options={{ headerShown: true }}
     />
+    <Stack.Screen
+      name="Search"
+      component={SearchScreen}
+      options={{ headerShown: true }}
+    />
+    <Stack.Screen name="Welcome" component={WelcomeScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Register" component={RegiserScreen} />
     <Stack.Screen name="Home" component={HomeScreen} />

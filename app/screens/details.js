@@ -22,26 +22,29 @@ import Loading from "../components/loading";
 import StyledButton from "../components/button";
 
 function DetailsScreen({ route, navigation }) {
-  let getMovie = useApi(get.getMovie);
+  let getDetails = useApi(get.getDetails);
+  let getEpisodes = useApi(get.getEpisodes);
+  let getLinks = useApi(get.getLinks);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [downloadVisible, setDownloadVisible] = useState(false);
   const [watchVisible, setWatchVisible] = useState(false);
 
   useEffect(() => {
-    getMovie.request(route.params.link);
+    getDetails.request(route.params.link);
   }, []);
 
   return (
     <View style={styles.container}>
-      <Loading visible={getMovie.loading} />
-      {!getMovie.loading && (
+      <Loading visible={getDetails.loading} />
+      {!getDetails.loading && (
         <>
           <View style={styles.padding}>
             <TouchableOpacity
-              onPress={() => Linking.openURL(getMovie.data.video)}
+              onPress={() => Linking.openURL(getDetails.data.video)}
             >
               <Image
-                source={{ uri: getMovie.data.videoImg }}
+                source={{ uri: getDetails.data.videoImg }}
                 resizeMode="stretch"
                 blurRadius={3}
                 style={styles.banner}
@@ -52,31 +55,31 @@ function DetailsScreen({ route, navigation }) {
             </TouchableOpacity>
             <Separator top={5} />
             <StyledText size={30} weight="bold">
-              {getMovie.data.name}
+              {getDetails.data.name}
             </StyledText>
             <Separator top={7} />
             <View style={styles.rowContainer}>
               <StyledText color={colors.light} weight="normal">
-                {getMovie.data.release_date}
+                {getDetails.data.release_date}
               </StyledText>
               <Separator right={8} />
               <Octicons name="dot-fill" size={12} color={colors.light} />
               <Separator left={8} />
               <StyledText color={colors.light} weight="normal">
-                {getMovie.data.duration}
+                {getDetails.data.duration}
               </StyledText>
 
               <Separator right={8} />
               <Octicons name="dot-fill" size={12} color={colors.light} />
               <Separator left={8} />
               <StyledText color={colors.light} weight="normal">
-                {getMovie.data.quality}
+                {getDetails.data.quality}
               </StyledText>
             </View>
             <Separator top={7} />
             <View style={styles.rowContainer}>
               <StarRatingBar
-                score={Number(getMovie.data.rating) / 2}
+                score={Number(getDetails.data.rating) / 2}
                 scoreText=" / 5"
                 dontShowScore={false}
                 allowsHalfStars={true}
@@ -85,7 +88,7 @@ function DetailsScreen({ route, navigation }) {
             </View>
             <Separator top={15} />
             <FlatList
-              data={getMovie.data.genre}
+              data={getDetails.data.genre}
               centerContent
               horizontal
               contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
@@ -108,7 +111,10 @@ function DetailsScreen({ route, navigation }) {
             <StyledButton
               title="Watch | Download"
               radius={20}
-              onPress={() => setModalVisible(true)}
+              onPress={() => {
+                setModalVisible(true);
+                getLinks.request(route.params.link);
+              }}
             />
           </View>
           <Modal
@@ -156,6 +162,7 @@ function DetailsScreen({ route, navigation }) {
             transparent={true}
           >
             <View style={[styles.modalContainer, { height: "70%" }]}>
+              <Loading visible={getLinks.loading} />
               <TouchableOpacity onPress={() => setDownloadVisible(false)}>
                 <View style={styles.iconContainer}>
                   <View style={styles.iconBG}>
@@ -171,14 +178,16 @@ function DetailsScreen({ route, navigation }) {
                 }}
               >
                 <FlatList
-                  data={getMovie.data.watch}
+                  data={getLinks.data.watch}
                   renderItem={({ item }) => (
                     <>
-                      <StyledButton
-                        title={`${item.quality}p | ${item.size}`}
-                        width="100%"
-                        onPress={() => Linking.openURL(item.link)}
-                      />
+                      {!getLinks.loading && (
+                        <StyledButton
+                          title={`${item.quality}p | ${item.size}`}
+                          width="100%"
+                          onPress={() => Linking.openURL(item.link)}
+                        />
+                      )}
                       <Separator top={25} />
                     </>
                   )}
@@ -192,6 +201,7 @@ function DetailsScreen({ route, navigation }) {
             transparent={true}
           >
             <View style={[styles.modalContainer, { height: "70%" }]}>
+              <Loading visible={getLinks.loading} />
               <TouchableOpacity onPress={() => setWatchVisible(false)}>
                 <View style={styles.iconContainer}>
                   <View style={styles.iconBG}>
@@ -207,16 +217,18 @@ function DetailsScreen({ route, navigation }) {
                 }}
               >
                 <FlatList
-                  data={getMovie.data.watch}
+                  data={getLinks.data.watch}
                   renderItem={({ item }) => (
                     <>
-                      <StyledButton
-                        title={`${item.quality}p | ${item.size}`}
-                        width="100%"
-                        onPress={() =>
-                          navigation.navigate("Play", { link: item.link })
-                        }
-                      />
+                      {!getLinks.loading && (
+                        <StyledButton
+                          title={`${item.quality}p | ${item.size}`}
+                          width="100%"
+                          onPress={() =>
+                            navigation.navigate("Play", { link: item.link })
+                          }
+                        />
+                      )}
                       <Separator top={25} />
                     </>
                   )}

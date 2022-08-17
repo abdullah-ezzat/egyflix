@@ -1,32 +1,50 @@
 import React from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import colors from "../config/colors";
+import Icon from "./icon";
+import Separator from "./separator";
 
-function StyledInput({ placeholder }) {
+function StyledInput({
+  placeholder,
+  value,
+  onChange,
+  icon,
+  iconSize = 25,
+  iconColor = "white",
+  iconPress,
+  radius = 25,
+}) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { borderRadius: radius }]}>
       <TextInput
+        onChangeText={onChange}
+        value={value}
         style={styles.text}
         placeholder={placeholder}
         placeholderTextColor={colors.light}
       />
+      {icon && (
+        <TouchableOpacity onPress={iconPress}>
+          <Icon name={icon} size={iconSize} color={iconColor} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: "center",
-    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    flexDirection: "row",
     paddingLeft: 30,
     backgroundColor: colors.darkgrey,
-    borderRadius: 25,
     width: "90%",
     height: 70,
   },
   text: {
     color: "white",
-    width: "100%",
+    width: "85%",
   },
 });
 
