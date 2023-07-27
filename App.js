@@ -8,9 +8,10 @@ import RegiserScreen from "./app/screens/register";
 import WelcomeScreen from "./app/screens/welcome";
 import HomeScreen from "./app/screens/home";
 import DetailsScreen from "./app/screens/details";
-import VideoPlayScreen from "./app/screens/video";
+import VideoPlayScreen from "./app/screens/watch";
 import colors from "./app/config/colors";
 import SearchScreen from "./app/screens/search";
+import ViewMoreScreen from "./app/screens/view";
 
 const Stack = createStackNavigator();
 const StackNavigator = () => (
@@ -26,17 +27,31 @@ const StackNavigator = () => (
     <Stack.Screen
       name="Details"
       component={DetailsScreen}
-      options={{ headerShown: true }}
+      options={({ route }) => ({
+        headerShown: true,
+        headerTitle: route.params.title,
+      })}
+    />
+    <Stack.Screen
+      name="ViewMore"
+      component={ViewMoreScreen}
+      options={({ route }) => ({
+        headerShown: true,
+        headerTitle: route.params.title,
+      })}
     />
     <Stack.Screen
       name="Play"
       component={VideoPlayScreen}
-      options={{ headerShown: true }}
+      options={({ route }) => ({
+        headerShown: true,
+        headerTitle: route.params.title,
+      })}
     />
     <Stack.Screen
       name="Search"
       component={SearchScreen}
-      options={{ headerShown: true }}
+      options={{ headerShown: true, headerTitle: "Home" }}
     />
     <Stack.Screen name="Welcome" component={WelcomeScreen} />
     <Stack.Screen name="Login" component={LoginScreen} />
@@ -47,7 +62,7 @@ const StackNavigator = () => (
 export default function App() {
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style="auto" />
       <NavigationContainer>
         <StackNavigator />
       </NavigationContainer>

@@ -11,6 +11,7 @@ function StyledText({
   size = 16,
   weight = "bold",
   font = "Roboto",
+  align = "center",
 }) {
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -41,21 +42,18 @@ function StyledText({
 
   return (
     <Text
-      style={[
-        styles.text,
-        { color: color, fontSize: size, fontWeight: weight, fontFamily: font },
-      ]}
+      style={{
+        color: color,
+        fontSize: size,
+        fontWeight: weight,
+        fontFamily: font,
+        textAlign: align,
+      }}
       onLayout={onLayout}
     >
       {children}
     </Text>
   );
 }
-
-const styles = StyleSheet.create({
-  text: {
-    textAlign: "center",
-  },
-});
 
 export default StyledText;

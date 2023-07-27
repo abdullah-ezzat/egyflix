@@ -1,8 +1,7 @@
 import { create } from "apisauce";
-import base from "./enviroment.js";
 
-let API = create({
-  baseURL: base.url,
+const API = create({
+  baseURL: "https://api.themoviedb.org/3/",
 });
 
 export default {

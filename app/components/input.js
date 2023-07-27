@@ -2,12 +2,16 @@ import React from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import colors from "../config/colors";
 import Icon from "./icon";
+import { AntDesign } from "@expo/vector-icons";
 import Separator from "./separator";
 
 function StyledInput({
   placeholder,
+  textColor = "white",
   value,
   onChange,
+  onFinish,
+  width = "90%",
   icon,
   iconSize = 25,
   iconColor = "white",
@@ -15,17 +19,19 @@ function StyledInput({
   radius = 25,
 }) {
   return (
-    <View style={[styles.container, { borderRadius: radius }]}>
+    <View style={[styles.container, { borderRadius: radius, width: width }]}>
       <TextInput
         onChangeText={onChange}
+        onEndEditing={onFinish}
         value={value}
-        style={styles.text}
+        style={{ width: "77%", color: textColor }}
         placeholder={placeholder}
-        placeholderTextColor={colors.light}
+        placeholderTextColor={textColor}
       />
+      <Separator right={10} />
       {icon && (
         <TouchableOpacity onPress={iconPress}>
-          <Icon name={icon} size={iconSize} color={iconColor} />
+          <AntDesign name={icon} size={iconSize} color={iconColor} />
         </TouchableOpacity>
       )}
     </View>
@@ -39,12 +45,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingLeft: 30,
     backgroundColor: colors.darkgrey,
-    width: "90%",
     height: 70,
-  },
-  text: {
-    color: "white",
-    width: "85%",
   },
 });
 

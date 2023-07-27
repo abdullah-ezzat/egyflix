@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "egyflix",
-    "slug": "egyflix",
-    "version": "1.1.0",
+    "name": "Egyflix",
+    "slug": "EGYFLIX",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#262A34"
+      "backgroundColor": "#000"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -23,7 +23,7 @@
       "package": "com.darkbug.egyflix",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#262A34"
+        "backgroundColor": "#000"
       }
     },
     "web": {

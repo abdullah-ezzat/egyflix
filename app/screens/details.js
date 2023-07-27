@@ -1,298 +1,243 @@
-import React, { useEffect, useState } from "react";
-import {
-  FlatList,
-  Image,
-  Linking,
-  Modal,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Octicons } from "@expo/vector-icons";
-import StarRatingBar from "react-native-star-rating-view/StarRatingBar";
+import { useEffect, useState } from "react";
+import { FlatList, Linking, ScrollView, StyleSheet, View } from "react-native";
+import imdbId from "imdb-id";
 
-import StyledText from "../components/text";
-import Separator from "../components/separator";
-import Icon from "../components/icon";
-import Badge from "../components/badge";
-import colors from "../config/colors";
 import useApi from "../hooks/useApi";
 import get from "../api/get";
+import colors from "../config/colors";
+import Card from "../components/card";
+import Separator from "../components/separator";
+import DetailedBadge from "../components/detailedBadge";
+import Badge from "../components/badge";
+import StyledText from "../components/text";
 import Loading from "../components/loading";
-import StyledButton from "../components/button";
 
 function DetailsScreen({ route, navigation }) {
-  let getDetails = useApi(get.getDetails);
-  let getEpisodes = useApi(get.getEpisodes);
-  let getLinks = useApi(get.getLinks);
+  const [season, setSeason] = useState();
+  const [episode, setEpisode] = useState();
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [downloadVisible, setDownloadVisible] = useState(false);
-  const [watchVisible, setWatchVisible] = useState(false);
+  let getDetails = useApi(get.getDetails);
+  let getCasting = useApi(get.getCasting);
+  let getVideos = useApi(get.getVideos);
+  let getMovieDownload = useApi(get.getMovieDownload);
+  let getSeriesDownload = useApi(get.getSeriesDownload);
+
+  let videos = getVideos.data.results;
+  let casting = getCasting.data.cast;
+  let details = getDetails.data;
 
   useEffect(() => {
-    getDetails.request(route.params.link);
+    getDetails.request(route.params.type, route.params.id);
+    getCasting.request(route.params.type, route.params.id);
+    getVideos.request(route.params.type, route.params.id);
   }, []);
 
+  const clockFormat = (mins) => {
+    let hours = Math.floor(mins / 60);
+    let minutes = mins % 60;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    return `${hours}h ${minutes}m`;
+  };
+
+  const getTrailer = () => {
+    let trailer;
+    for (const i in videos) {
+      if (videos[i].type == "Trailer") {
+        trailer = videos[i].key;
+      }
+    }
+    if (trailer) Linking.openURL(`https://www.youtube.com/embed/${trailer}`);
+  };
+
+  function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return "0";
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  }
+
+  const getDownloadLink = async () => {
+    // if (route.params.type == "movie") {
+    //   getMovieDownload.request(details.id);
+    //   console.log(getMovieDownload.data);
+    // } else {
+    //   getSeriesDownload.request(details.id, season, episode);
+    //   console.log(getSeriesDownload.data);
+    // }
+    const id = await imdbId(route.params.title);
+    console.log(id);
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={styles.bgContainer}>
       <Loading visible={getDetails.loading} />
       {!getDetails.loading && (
-        <>
-          <View style={styles.padding}>
-            <TouchableOpacity
-              onPress={() => Linking.openURL(getDetails.data.video)}
-            >
-              <Image
-                source={{ uri: getDetails.data.videoImg }}
-                resizeMode="stretch"
-                blurRadius={3}
-                style={styles.banner}
+        <ScrollView contentContainerStyle={styles.container}>
+          <View style={styles.rowContainer}>
+            <Card
+              image={details.poster_path}
+              width={220}
+              height={300}
+              radius={25}
+            />
+            <Separator right={-15} />
+            <View style={{ zIndex: -10 }}>
+              <DetailedBadge
+                iconAnt="staro"
+                iconSize={23}
+                iconColor={colors.primary}
+                title={details.vote_average && details.vote_average.toFixed(1)}
+                subTitle="Rating"
+                color="white"
+                opacity={1}
+                bgColor={colors.mediumdark}
+                width={120}
+                height={91}
+                radius={20}
               />
-              <View style={styles.icon}>
-                <Icon name="youtube" size={70} color="#ddd" />
-              </View>
-            </TouchableOpacity>
-            <Separator top={5} />
-            <StyledText size={30} weight="bold">
-              {getDetails.data.name}
+              <Separator top={10} />
+              <DetailedBadge
+                iconAnt="clockcircleo"
+                iconSize={23}
+                iconColor={colors.primary}
+                title={
+                  (details.runtime && clockFormat(details.runtime)) ||
+                  (details.episode_run_time &&
+                    clockFormat(details.episode_run_time[0]))
+                }
+                subTitle="Duration"
+                color="white"
+                opacity={1}
+                bgColor={colors.mediumdark}
+                width={120}
+                height={91}
+                radius={20}
+              />
+              <Separator top={10} />
+              <DetailedBadge
+                iconAnt="calendar"
+                iconSize={23}
+                iconColor={colors.primary}
+                title={
+                  (details.release_date &&
+                    details.release_date.split("-")[0]) ||
+                  (details.last_air_date && details.last_air_date.split("-")[0])
+                }
+                subTitle="Year"
+                color="white"
+                opacity={1}
+                bgColor={colors.mediumdark}
+                width={120}
+                height={91}
+                radius={20}
+              />
+            </View>
+          </View>
+          <Separator top={40} />
+          <View style={{ flexDirection: "row" }}>
+            <Badge
+              iconAnt="sharealt"
+              width={60}
+              height={60}
+              iconSize={25}
+              radius={100}
+              iconColor="white"
+              bgColor={colors.mediumdark}
+            />
+            <Separator right={20} />
+            <Badge
+              iconAnt="clouddownloado"
+              width={60}
+              height={60}
+              iconSize={30}
+              radius={100}
+              bgColor={colors.mediumdark}
+              iconColor="white"
+              onPress={() => getDownloadLink()}
+            />
+            <Separator right={20} />
+            <Badge
+              iconAnt="staro"
+              width={60}
+              height={60}
+              iconSize={25}
+              radius={100}
+              iconColor="white"
+              bgColor={colors.mediumdark}
+            />
+            <Separator right={20} />
+            <Badge
+              iconAnt="youtube"
+              width={60}
+              height={60}
+              iconSize={25}
+              radius={100}
+              bgColor={colors.mediumdark}
+              iconColor="white"
+              onPress={() => getTrailer()}
+            />
+          </View>
+          <Separator top={40} />
+          <View style={styles.detailsContainer}>
+            <StyledText size={22}>Plot Overview</StyledText>
+            <Separator top={20} />
+            <StyledText color={colors.light} size={15} align="left">
+              {details.overview}
             </StyledText>
-            <Separator top={7} />
-            <View style={styles.rowContainer}>
-              <StyledText color={colors.light} weight="normal">
-                {getDetails.data.release_date}
-              </StyledText>
-              <Separator right={8} />
-              <Octicons name="dot-fill" size={12} color={colors.light} />
-              <Separator left={8} />
-              <StyledText color={colors.light} weight="normal">
-                {getDetails.data.duration}
-              </StyledText>
-
-              <Separator right={8} />
-              <Octicons name="dot-fill" size={12} color={colors.light} />
-              <Separator left={8} />
-              <StyledText color={colors.light} weight="normal">
-                {getDetails.data.quality}
-              </StyledText>
-            </View>
-            <Separator top={7} />
-            <View style={styles.rowContainer}>
-              <StarRatingBar
-                score={Number(getDetails.data.rating) / 2}
-                scoreText=" / 5"
-                dontShowScore={false}
-                allowsHalfStars={true}
-                accurateHalfStars={true}
-              />
-            </View>
-            <Separator top={15} />
+            <Separator top={40} />
+            <StyledText size={22}>Casting</StyledText>
+            <Separator top={20} />
             <FlatList
-              data={getDetails.data.genre}
-              centerContent
               horizontal
-              contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+              data={casting}
               renderItem={({ item }) => (
-                <View style={styles.rowContainer}>
-                  <Badge
-                    name={item.name}
-                    bgColor={colors.lightgrey}
-                    radius={8}
-                    size={15}
-                    width={70}
-                    height={35}
-                  />
-                  <Separator right={5} />
-                </View>
+                <>
+                  <View style={{ flexDirection: "column" }}>
+                    <Card
+                      resizeMode="contain"
+                      image={item.profile_path}
+                      width={100}
+                      height={100}
+                      radius={15}
+                    />
+                    <Separator top={10} />
+                    <StyledText size={14}>{item.name}</StyledText>
+                    <Separator top={5} />
+                    <StyledText size={13} color={colors.light}>
+                      {item.character}
+                    </StyledText>
+                  </View>
+                  <Separator right={40} />
+                </>
               )}
             />
+            <Separator top={20} />
           </View>
-          <View style={[styles.rowContainer, styles.buttonContainer]}>
-            <StyledButton
-              title="Watch | Download"
-              radius={20}
-              onPress={() => {
-                setModalVisible(true);
-                getLinks.request(route.params.link);
-              }}
-            />
-          </View>
-          <Modal
-            animationType="slide"
-            visible={modalVisible}
-            transparent={true}
-          >
-            <View style={styles.modalContainer}>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <View style={styles.iconContainer}>
-                  <View style={styles.iconBG}>
-                    <Icon name="close" size={60} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-              <View
-                style={{
-                  marginTop: "15%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <StyledButton
-                  title="Watch"
-                  icon="play-outline"
-                  iconColor="white"
-                  iconSize={25}
-                  onPress={() => setWatchVisible(true)}
-                />
-                <Separator top={25} />
-                <StyledButton
-                  title="Download"
-                  icon="download-outline"
-                  iconColor="white"
-                  iconPadding={5}
-                  iconSize={20}
-                  onPress={() => setDownloadVisible(true)}
-                />
-              </View>
-            </View>
-          </Modal>
-          <Modal
-            animationType="slide"
-            visible={downloadVisible}
-            transparent={true}
-          >
-            <View style={[styles.modalContainer, { height: "70%" }]}>
-              <Loading visible={getLinks.loading} />
-              <TouchableOpacity onPress={() => setDownloadVisible(false)}>
-                <View style={styles.iconContainer}>
-                  <View style={styles.iconBG}>
-                    <Icon name="close" size={60} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-              <View
-                style={{
-                  marginTop: "15%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <FlatList
-                  data={getLinks.data.watch}
-                  renderItem={({ item }) => (
-                    <>
-                      {!getLinks.loading && (
-                        <StyledButton
-                          title={`${item.quality}p | ${item.size}`}
-                          width="100%"
-                          onPress={() => Linking.openURL(item.link)}
-                        />
-                      )}
-                      <Separator top={25} />
-                    </>
-                  )}
-                />
-              </View>
-            </View>
-          </Modal>
-          <Modal
-            animationType="slide"
-            visible={watchVisible}
-            transparent={true}
-          >
-            <View style={[styles.modalContainer, { height: "70%" }]}>
-              <Loading visible={getLinks.loading} />
-              <TouchableOpacity onPress={() => setWatchVisible(false)}>
-                <View style={styles.iconContainer}>
-                  <View style={styles.iconBG}>
-                    <Icon name="close" size={60} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-              <View
-                style={{
-                  marginTop: "15%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <FlatList
-                  data={getLinks.data.watch}
-                  renderItem={({ item }) => (
-                    <>
-                      {!getLinks.loading && (
-                        <StyledButton
-                          title={`${item.quality}p | ${item.size}`}
-                          width="100%"
-                          onPress={() =>
-                            navigation.navigate("Play", { link: item.link })
-                          }
-                        />
-                      )}
-                      <Separator top={25} />
-                    </>
-                  )}
-                />
-              </View>
-            </View>
-          </Modal>
-        </>
+        </ScrollView>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  bgContainer: {
     flex: 1,
     backgroundColor: colors.dark,
   },
-  banner: {
-    width: "100%",
-    height: 300,
-  },
-  icon: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
+  container: {
+    flexGrow: 1,
     alignItems: "center",
-  },
-  padding: {
-    marginTop: "3%",
-  },
-  buttonContainer: {
-    position: "absolute",
-    bottom: "5%",
-    left: 0,
-    right: 0,
+    padding: 20,
   },
   rowContainer: {
+    alignItems: "center",
     flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
   },
-  modalContainer: {
-    position: "absolute",
-    bottom: 0,
-    height: "35%",
-    width: "100%",
-    backgroundColor: colors.darkgrey,
-  },
-  iconContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: "-26%",
-  },
-  iconBG: {
-    justifyContent: "center",
-    alignItems: "center",
-    width: 90,
-    height: 90,
-    borderRadius: 100,
-    backgroundColor: colors.darkgrey,
+  detailsContainer: {
+    alignItems: "flex-start",
+    paddingLeft: 10,
   },
 });
 
